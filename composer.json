@@ -1,0 +1,21 @@
+{
+  "name": "bitterbyter/jwt",
+  "description": "A simple library to sign and verify JWT.",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "BitterByter\\JWT\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "BitterByter",
+      "email": "manukaushik.m@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": "^8.0"
+  }
+}
