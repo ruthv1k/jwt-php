@@ -34,6 +34,9 @@ class JWT
     {
         $data = self::dotUp(self::$headers, $payload);
 
+        // PR#1 - Remove padding ('=')
+        $data = str_replace("=", "", $data);
+
         $secret = base64_encode($secret);
 
         $signature = hash_hmac(self::$algo, $data, $secret);
@@ -49,7 +52,7 @@ class JWT
      *
      * @return array|string
      */
-    public static function verify(string $token, string $secret): array|string
+    public static function verify(string $token, string $secret): array
     {
         [$tokenHeader, $tokenPayload, $tokenSignature] = explode('.', $token);
 
@@ -62,10 +65,18 @@ class JWT
         $isEqual = hash_equals($signature, $tokenSignature);
 
         if ($isEqual) {
-            return json_decode($tokenPayload);
-        } else {
-            return 'Invalid Token';
+            $tokenPayload = self::decode($tokenPayload);
+    
+            if (time() > $tokenPayload->exp) {
+                // TODO#1 - InvalidTokenException must be thrown with the message "Token Expired"
+                return [];
+            }
+
+            return $tokenPayload;
         }
+        
+        // TODO#1 - InvalidTokenException must be thrown with the message "Invalid Token"
+        return [];
     }
 
     /**
@@ -78,6 +89,18 @@ class JWT
     private static function encode(array $data): string
     {
         return base64_encode(json_encode($data));
+    }
+
+    /**
+     * Decodes $data from base64 and JSON.
+     *
+     * @param string $data The data to decode.
+     *
+     * @return mixed
+     */
+    private static function decode(string $data): array
+    {
+        return (array)json_decode(base64_decode($data));
     }
 
     /**
